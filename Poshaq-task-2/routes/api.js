@@ -5,43 +5,45 @@ const toDo = require('../models/toDoSchema');
 //Move Task
 router.patch('/move_task/',(req,res,next)=>{
     var task;
-    toDo.findOne({"tasks._id":req.body.taskId},function (err,obj){
-        if(err){
-            res.status(500).json(err);
-        }
-        else{
-            if(obj && obj.tasks){
-                obj.tasks.forEach(element => {
-                    if(element.id == req.body.taskId){
-                        task = element;
-                    }
-                });
-            }
-        }
-    });
-    toDo.updateOne({'tasks._id':req.body.taskId},{'$pull':{tasks:{_id:req.body.taskId}}
-    }).then(function(obj,err){
-        if(err)
-            res.status(500).json(err);
-        else{
-            if(obj.nModified==1 || obj.n ==1){
-                toDo.findById(req.body.labelId, function (err, obj) {
-                    if(err){
-                        res.status(500).json(err);
-                    }
-                    else{                       
-                        obj.tasks.push(task);
-                        obj.save();
-                        res.status(200).json(obj);
-                    }
-                });
+
+    req.body.taskId.forEach(id =>{
+        toDo.findOne({"tasks._id":id},function (err,obj){
+            if(err){
+                res.status(500).json(err);
             }
             else{
-                res.status(404).json({message:"No Task with given Id found"});
+                if(obj && obj.tasks){
+                    obj.tasks.forEach(element => {
+                        if(element.id == id){
+                            task = element;
+                        }
+                    });
+                }
             }
-            
-        }
-    })
+        });
+        toDo.updateOne({'tasks._id':id},{'$pull':{tasks:{_id:id}}
+        }).then(function(obj,err){
+            if(err)
+                res.status(500).json(err);
+            else{
+                if(obj.nModified==1 || obj.n ==1){
+                    toDo.findById(req.body.labelId, function (err, obj) {
+                        if(err){
+                            res.status(500).json(err);
+                        }
+                        else{                       
+                            obj.tasks.push(task);
+                            obj.save();
+                            res.status(200).json(obj);
+                        }
+                    });
+                }
+                else{
+                    res.status(404).json({message:"No Task with given Id found"});
+                }
+            }
+        })
+    });
 });
 
 
@@ -111,9 +113,10 @@ router.delete('/delete_task/:id', function (req, res, next) {
 // label CRUD
 router.put('/update_label/:todoid', function (req, res, next) {
 
-    toDo.findById(req.params.todoId,(err, todo) => {
+    toDo.findOne({"_id":req.params.todoid},(err, todo) => {
      
-        console.log(todo);
+        todo.label = req.body.label;
+        todo.save();
         
             if (err) 
                 res.status(500).send(err);
