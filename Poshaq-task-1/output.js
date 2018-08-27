@@ -45,16 +45,9 @@ const submission = async (client, dbName, collectionName, bucketSize) => {
         
         ultimate_answer[0] = answer;
 
-        // console.log(ultimate_answer);
-
-        return ultimate_answer;
-        
+        console.log(ultimate_answer);
     });
 
 }
 
-var final = submission("mongodb://admin:password1@ds133632.mlab.com:33632/", "poshaq", 'category', 3);
-   
-
-
-
+submission("mongodb://admin:password1@ds133632.mlab.com:33632/", "poshaq", 'category', 3);
